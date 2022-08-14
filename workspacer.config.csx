@@ -78,7 +78,7 @@ return new Action<IConfigContext>((IConfigContext context) =>
         },
         RightWidgets = () => new IBarWidget[]
         {
-            new TimeWidget(1000, "HH:mm:ss tt dd-MMM-yyyy"),
+            new TimeWidget(1000, "hh:mm:ss tt dd-MMM-yyyy"),
             new ActiveLayoutWidget(),
         }
     });
