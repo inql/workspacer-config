@@ -1,33 +1,7 @@
-// #r "C:\Program Files\workspacer\workspacer.Shared.dll"
-// #r "C:\Program Files\workspacer\plugins\workspacer.Bar\workspacer.Bar.dll"
-// #r "C:\Program Files\workspacer\plugins\workspacer.ActionMenu\workspacer.ActionMenu.dll"
-// #r "C:\Program Files\workspacer\plugins\workspacer.FocusIndicator\workspacer.FocusIndicator.dll"
-
-// using System;
-// using workspacer;
-// using workspacer.Bar;
-// using workspacer.ActionMenu;
-// using workspacer.FocusIndicator;
-
-// Action<IConfigContext> doConfig = (context) =>
-// {
-//     // Uncomment to switch update branch (or to disable updates)
-//     //context.Branch = Branch.None;
-
-//     context.AddBar();
-//     context.AddFocusIndicator();
-//     var actionMenu = context.AddActionMenu();
-
-//     context.WorkspaceContainer.CreateWorkspaces("1", "2", "3", "4", "5");
-//     context.CanMinimizeWindows = true; // false by default
-// };
-// return doConfig;
-
-// Development
+﻿// Development
 // #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.Shared\bin\Debug\net5.0-windows\win10-x64\workspacer.Shared.dll"
 // #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.Bar\bin\Debug\net5.0-windows\win10-x64\workspacer.Bar.dll"
 // #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.Gap\bin\Debug\net5.0-windows\win10-x64\workspacer.Gap.dll"
-// #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.ActionMenu\bin\Debug\net5.0-windows\win10-x64\workspacer.ActionMenu.dll"
 // #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.FocusIndicator\bin\Debug\net5.0-windows\win10-x64\workspacer.FocusIndicator.dll"
 
 
@@ -35,7 +9,6 @@
 #r "C:\Program Files\workspacer\workspacer.Shared.dll"
 #r "C:\Program Files\workspacer\plugins\workspacer.Bar\workspacer.Bar.dll"
 #r "C:\Program Files\workspacer\plugins\workspacer.Gap\workspacer.Gap.dll"
-#r "C:\Program Files\workspacer\plugins\workspacer.ActionMenu\workspacer.ActionMenu.dll"
 #r "C:\Program Files\workspacer\plugins\workspacer.FocusIndicator\workspacer.FocusIndicator.dll"
 
 using System;
@@ -45,11 +18,13 @@ using workspacer;
 using workspacer.Bar;
 using workspacer.Bar.Widgets;
 using workspacer.Gap;
-using workspacer.ActionMenu;
 using workspacer.FocusIndicator;
 
 return new Action<IConfigContext>((IConfigContext context) =>
 {
+
+    var monitors = context.MonitorContainer.GetAllMonitors();
+
     /* Variables */
     var fontSize = 9;
     var barHeight = 19;
@@ -130,87 +105,6 @@ return new Action<IConfigContext>((IConfigContext context) =>
 
     context.WindowRouter.AddRoute((window) => window.Title.Contains("Firefox") ? context.WorkspaceContainer["[4] web"] : null);
     context.WindowRouter.AddRoute((window) => window.Title.Contains("Edge") ? context.WorkspaceContainer["[4] web"] : null);
-    /* Action menu */
-    var actionMenu = context.AddActionMenu(new ActionMenuPluginConfig()
-    {
-        RegisterKeybind = false,
-        MenuHeight = barHeight,
-        FontSize = fontSize,
-        FontName = fontName,
-        Background = background,
-    });
-
-    /* Action menu builder */
-    Func<ActionMenuItemBuilder> createActionMenuBuilder = () =>
-    {
-        var menuBuilder = actionMenu.Create();
-
-        // Switch to workspace
-        menuBuilder.AddMenu("switch", () =>
-        {
-            var workspaceMenu = actionMenu.Create();
-            var monitor = context.MonitorContainer.FocusedMonitor;
-            var workspaces = context.WorkspaceContainer.GetWorkspaces(monitor);
-
-            Func<int, Action> createChildMenu = (workspaceIndex) => () =>
-            {
-                context.Workspaces.SwitchMonitorToWorkspace(monitor.Index, workspaceIndex);
-            };
-
-            int workspaceIndex = 0;
-            foreach (var workspace in workspaces)
-            {
-                workspaceMenu.Add(workspace.Name, createChildMenu(workspaceIndex));
-                workspaceIndex++;
-            }
-
-            return workspaceMenu;
-        });
-
-        // Move window to workspace
-        menuBuilder.AddMenu("move", () =>
-        {
-            var moveMenu = actionMenu.Create();
-            var focusedWorkspace = context.Workspaces.FocusedWorkspace;
-
-            var workspaces = context.WorkspaceContainer.GetWorkspaces(focusedWorkspace).ToArray();
-            Func<int, Action> createChildMenu = (index) => () => { context.Workspaces.MoveFocusedWindowToWorkspace(index); };
-
-            for (int i = 0; i < workspaces.Length; i++)
-            {
-                moveMenu.Add(workspaces[i].Name, createChildMenu(i));
-            }
-
-            return moveMenu;
-        });
-
-        // Rename workspace
-        menuBuilder.AddFreeForm("rename", (name) =>
-        {
-            context.Workspaces.FocusedWorkspace.Name = name;
-        });
-
-        // Create workspace
-        menuBuilder.AddFreeForm("create workspace", (name) =>
-        {
-            context.WorkspaceContainer.CreateWorkspace(name);
-        });
-
-        // Delete focused workspace
-        menuBuilder.Add("close", () =>
-        {
-            context.WorkspaceContainer.RemoveWorkspace(context.Workspaces.FocusedWorkspace);
-        });
-
-        // Workspacer
-        menuBuilder.Add("toggle keybind helper", () => context.Keybinds.ShowKeybindDialog());
-        menuBuilder.Add("toggle enabled", () => context.Enabled = !context.Enabled);
-        menuBuilder.Add("restart", () => context.Restart());
-        menuBuilder.Add("quit", () => context.Quit());
-
-        return menuBuilder;
-    };
-    var actionMenuBuilder = createActionMenuBuilder();
 
     /* Keybindings */
     Action setKeybindings = () =>
@@ -255,7 +149,6 @@ return new Action<IConfigContext>((IConfigContext context) =>
         manager.Subscribe(winShift, Keys.Subtract, () => gapPlugin.DecrementOuterGap(), "decrement outer gap");
 
         // Other shortcuts
-        manager.Subscribe(winCtrl, Keys.P, () => actionMenu.ShowMenu(actionMenuBuilder), "show menu");
         manager.Subscribe(winShift, Keys.Escape, () => context.Enabled = !context.Enabled, "toggle enabled/disabled");
         manager.Subscribe(winShift, Keys.I, () => context.ToggleConsoleWindow(), "toggle console window");
     };
