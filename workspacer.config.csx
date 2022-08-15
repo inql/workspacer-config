@@ -90,19 +90,22 @@ return new Action<IConfigContext>((IConfigContext context) =>
     var sticky = new StickyWorkspaceContainer(context, StickyWorkspaceIndexMode.Local);
     context.WorkspaceContainer = sticky;
 
-    var mainWorkspacesNames = new List<string> {
-        "1|main",
-        "2|code",
-        "3|chat/out",
-        "4|web",
-        "5|other",
-        "6|offtopic",
-        "7|media🎶" 
+    var mainWorkspaces = new Dictionary<string, ILayoutEngine[]> {
+        {"1|main", new ILayoutEngine[] { new DwindleLayoutEngine()}},
+        {"2|secondary", new ILayoutEngine[] { new FocusLayoutEngine ()}},
+        {"3|term", defaultLayouts()},
+        {"4|comm", defaultLayouts()},
+        {"5|org", defaultLayouts()},
+        {"6|offtopic", defaultLayouts()},
+        {"7|full", defaultLayouts()},
+        {"8|media🎶", defaultLayouts()}
     };
 
-    foreach (var name in mainWorkspacesNames)
+    var mainWorkspacesNames = mainWorkspaces.Keys.ToList();
+
+    foreach (var item in mainWorkspaces)
     {
-        sticky.CreateWorkspace(monitors[0], name, defaultLayouts());
+        sticky.CreateWorkspace(monitors[0], item.Key, item.Value);
     }
 
     /* TODO: define cool stuff for rest of the monitors */
@@ -117,11 +120,12 @@ return new Action<IConfigContext>((IConfigContext context) =>
     {
         {mainWorkspacesNames[0], new List<string> {}},
         {mainWorkspacesNames[1], new List<string> {}},
-        {mainWorkspacesNames[2], new List<string> {"Microsoft Teams", "Outlook"}},
-        {mainWorkspacesNames[3], new List<string> {"Mozilla Firefox", "Microsoft Edge"}},
-        {mainWorkspacesNames[4], new List<string> {}},
+        {mainWorkspacesNames[2], new List<string> {"Microsoft Teams"}},
+        {mainWorkspacesNames[3], new List<string> {}},
+        {mainWorkspacesNames[4], new List<string> {"Outlook"}},
         {mainWorkspacesNames[5], new List<string> {"Discord"}},
-        {mainWorkspacesNames[6], new List<string> {"Spotify"}}
+        {mainWorkspacesNames[6], new List<string> {}},
+        {mainWorkspacesNames[7], new List<string> {"Spotify"}}
     };
 
     var rejectList = new List<string>(){
