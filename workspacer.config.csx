@@ -20,11 +20,21 @@ using workspacer.Bar.Widgets;
 using workspacer.Gap;
 using workspacer.FocusIndicator;
 
-return new Action<IConfigContext>((IConfigContext context) =>
+
+// Only 1 screen available
+void UltrawideSetup(IConfigContext context)
 {
 
-    var monitors = context.MonitorContainer.GetAllMonitors();
+}
 
+// 2 or more screen available, focus on 1 screen but adjust for extra workspace
+void MultimonitorSetup(IConfigContext context)
+{
+
+}
+
+return new Action<IConfigContext>((IConfigContext context) =>
+{
     /* Variables */
     var fontSize = 9;
     var barHeight = 19;
@@ -59,8 +69,11 @@ return new Action<IConfigContext>((IConfigContext context) =>
     });
 
     /* Bar focus indicator */
-    context.AddFocusIndicator();
-
+    context.AddFocusIndicator(new FocusIndicatorPluginConfig()
+    {
+        BorderColor = Color.Red,
+        TimeToShow = 1000, //
+    });
     /* Default layouts */
     Func<ILayoutEngine[]> defaultLayouts = () => new ILayoutEngine[]
     {
@@ -72,39 +85,62 @@ return new Action<IConfigContext>((IConfigContext context) =>
 
     context.DefaultLayouts = defaultLayouts;
 
-    /* Workspaces */
-    // Array of workspace names and their layouts
-    (string, ILayoutEngine[])[] workspaces =
-    {
-        ("[1] main", defaultLayouts()),
-        ("[2] main", defaultLayouts()),
-        ("[3] chat/out", defaultLayouts()),
-        ("[4] web", defaultLayouts()),
-        ("[5] other", defaultLayouts()),
-        ("[6] offtopic", defaultLayouts()),
-        ("[7] 🎶", defaultLayouts()),
+    var monitors = context.MonitorContainer.GetAllMonitors();
+
+    var sticky = new StickyWorkspaceContainer(context, StickyWorkspaceIndexMode.Local);
+    context.WorkspaceContainer = sticky;
+
+    var mainWorkspacesNames = new List<string> {
+        "1|main",
+        "2|code",
+        "3|chat/out",
+        "4|web",
+        "5|other",
+        "6|offtopic",
+        "7|media🎶" 
     };
 
-    foreach ((string name, ILayoutEngine[] layouts) in workspaces)
+    foreach (var name in mainWorkspacesNames)
     {
-        context.WorkspaceContainer.CreateWorkspace(name, layouts);
+        sticky.CreateWorkspace(monitors[0], name, defaultLayouts());
     }
 
-    /* Filters */
-    context.WindowRouter.AddFilter((window) => !window.ProcessFileName.Equals("1Password.exe"));
-    context.WindowRouter.AddFilter((window) => !window.ProcessFileName.Equals("pinentry.exe"));
-
-    // The following filter means that Edge will now open on the correct display
-    context.WindowRouter.AddFilter((window) => !window.Class.Equals("ShellTrayWnd"));
+    /* TODO: define cool stuff for rest of the monitors */
+    for (int i = 1; i < monitors.Length; i++)
+    {
+        sticky.CreateWorkspaces(monitors[i], $"{i}:1", $"{i}:2", $"{i}:3", $"{i}:4", $"{i}:5", $"{i}:6", $"{i}:7", $"{i}:8", $"{i}:9");
+    }
 
     /* Routes */
-    context.WindowRouter.RouteProcessName("Discord", "[6] offtopic");
-    context.WindowRouter.RouteProcessName("Microsoft Teams", "[3] chat/out");
-    context.WindowRouter.RouteProcessName("Outlook", "[3] chat/out");
-    context.WindowRouter.RouteProcessName("Spotify", "[7] 🎶");
 
-    context.WindowRouter.AddRoute((window) => window.Title.Contains("Firefox") ? context.WorkspaceContainer["[4] web"] : null);
-    context.WindowRouter.AddRoute((window) => window.Title.Contains("Edge") ? context.WorkspaceContainer["[4] web"] : null);
+    var routeMapper = new Dictionary<string, List<string>>()
+    {
+        {mainWorkspacesNames[0], new List<string> {}},
+        {mainWorkspacesNames[1], new List<string> {}},
+        {mainWorkspacesNames[2], new List<string> {"Microsoft Teams", "Outlook"}},
+        {mainWorkspacesNames[3], new List<string> {"Mozilla Firefox", "Microsoft Edge"}},
+        {mainWorkspacesNames[4], new List<string> {}},
+        {mainWorkspacesNames[5], new List<string> {"Discord"}},
+        {mainWorkspacesNames[6], new List<string> {"Spotify"}}
+    };
+
+    var rejectList = new List<string>(){
+        "1Password.exe",
+        "pinentry.exe"
+    };
+
+    foreach (var workspace in routeMapper.Keys)
+    {
+        foreach (var process in routeMapper[workspace])
+        {
+            context.WindowRouter.AddRoute((window) => window.Title.Contains(process) ? context.WorkspaceContainer[workspace] : null);
+        }
+    }
+
+    foreach (var process in rejectList)
+    {
+        context.WindowRouter.AddFilter((window) => !window.ProcessFileName.Equals(process));
+    }
 
     /* Keybindings */
     Action setKeybindings = () =>
