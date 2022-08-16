@@ -120,8 +120,8 @@ return new Action<IConfigContext>((IConfigContext context) =>
     {
         {mainWorkspacesNames[0], new List<string> {}},
         {mainWorkspacesNames[1], new List<string> {}},
-        {mainWorkspacesNames[2], new List<string> {"Microsoft Teams"}},
-        {mainWorkspacesNames[3], new List<string> {}},
+        {mainWorkspacesNames[2], new List<string> {}},
+        {mainWorkspacesNames[3], new List<string> {"Microsoft Teams"}},
         {mainWorkspacesNames[4], new List<string> {"Outlook"}},
         {mainWorkspacesNames[5], new List<string> {"Discord"}},
         {mainWorkspacesNames[6], new List<string> {}},
