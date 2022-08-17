@@ -37,7 +37,7 @@ return new Action<IConfigContext>((IConfigContext context) =>
 {
     /* Variables */
     var fontSize = 9;
-    var barHeight = 19;
+    var barHeight = 30;
     var fontName = "Cascadia Code PL";
     var background = new Color(0x0, 0x0, 0x0);
 
@@ -130,7 +130,8 @@ return new Action<IConfigContext>((IConfigContext context) =>
 
     var rejectList = new List<string>(){
         "1Password.exe",
-        "pinentry.exe"
+        "pinentry.exe",
+        "Volume Mixer"
     };
 
     foreach (var workspace in routeMapper.Keys)
@@ -144,6 +145,7 @@ return new Action<IConfigContext>((IConfigContext context) =>
     foreach (var process in rejectList)
     {
         context.WindowRouter.AddFilter((window) => !window.ProcessFileName.Equals(process));
+        context.WindowRouter.AddFilter((window) => !window.Title.Contains(process));
     }
 
     /* Keybindings */
