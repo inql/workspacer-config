@@ -37,7 +37,7 @@ return new Action<IConfigContext>((IConfigContext context) =>
 {
     /* Variables */
     var fontSize = 9;
-    var barHeight = 30;
+    var barHeight = 22;
     var fontName = "Cascadia Code PL";
     var background = new Color(0x0, 0x0, 0x0);
 
@@ -131,7 +131,8 @@ return new Action<IConfigContext>((IConfigContext context) =>
     var rejectList = new List<string>(){
         "1Password.exe",
         "pinentry.exe",
-        "Volume Mixer"
+        "Volume Mixer",
+        "Fluent Search"
     };
 
     foreach (var workspace in routeMapper.Keys)
