@@ -1,11 +1,4 @@
-﻿// Development
-// #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.Shared\bin\Debug\net5.0-windows\win10-x64\workspacer.Shared.dll"
-// #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.Bar\bin\Debug\net5.0-windows\win10-x64\workspacer.Bar.dll"
-// #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.Gap\bin\Debug\net5.0-windows\win10-x64\workspacer.Gap.dll"
-// #r "C:\Users\dalyisaac\Repos\workspacer\src\workspacer.FocusIndicator\bin\Debug\net5.0-windows\win10-x64\workspacer.FocusIndicator.dll"
-
-
-// Production
+﻿// Production
 #r "C:\Program Files\workspacer\workspacer.Shared.dll"
 #r "C:\Program Files\workspacer\plugins\workspacer.Bar\workspacer.Bar.dll"
 #r "C:\Program Files\workspacer\plugins\workspacer.Gap\workspacer.Gap.dll"
@@ -33,12 +26,14 @@ void MultimonitorSetup(IConfigContext context)
 
 }
 
+
+
 return new Action<IConfigContext>((IConfigContext context) =>
 {
     /* Variables */
     var fontSize = 9;
-    var barHeight = 22;
-    var fontName = "Cascadia Code PL";
+    var barHeight = 18;
+    var fontName = "FiraCode NF";
     var background = new Color(0x0, 0x0, 0x0);
 
     /* Config */
@@ -92,12 +87,12 @@ return new Action<IConfigContext>((IConfigContext context) =>
 
     var mainWorkspaces = new Dictionary<string, ILayoutEngine[]> {
         {"1|main", new ILayoutEngine[] { new DwindleLayoutEngine()}},
-        {"2|secondary", new ILayoutEngine[] { new FocusLayoutEngine ()}},
-        {"3|term", defaultLayouts()},
+        {"2|secondary", defaultLayouts()},
+        {"3|focus", new ILayoutEngine[] { new FocusLayoutEngine()}},
         {"4|comm", defaultLayouts()},
         {"5|org", defaultLayouts()},
         {"6|offtopic", defaultLayouts()},
-        {"7|full", defaultLayouts()},
+        {"7|full", new ILayoutEngine[] { new FullLayoutEngine()}},
         {"8|media🎶", defaultLayouts()}
     };
 
@@ -161,47 +156,30 @@ return new Action<IConfigContext>((IConfigContext context) =>
 
         var workspaces = context.Workspaces;
 
-        manager.UnsubscribeAll();
+        // manager.UnsubscribeAll();
         manager.Subscribe(MouseEvent.LButtonDown, () => workspaces.SwitchFocusedMonitorToMouseLocation());
 
         // Switching to workspaces
-        manager.Subscribe(alt, Keys.D1, () => workspaces.SwitchToWorkspace(0), "switch to workspace 1");
-        manager.Subscribe(alt, Keys.D2, () => workspaces.SwitchToWorkspace(1), "switch to workspace 2");
-        manager.Subscribe(alt, Keys.D3, () => workspaces.SwitchToWorkspace(2), "switch to workspace 3");
-        manager.Subscribe(alt, Keys.D4, () => workspaces.SwitchToWorkspace(3), "switch to workspace 4");
-        manager.Subscribe(alt, Keys.D5, () => workspaces.SwitchToWorkspace(4), "switch to workspace 5");
-        manager.Subscribe(alt, Keys.D6, () => workspaces.SwitchToWorkspace(5), "switch to workspace 6");
-        manager.Subscribe(alt, Keys.D7, () => workspaces.SwitchToWorkspace(6), "switch to workspace 7");
-        manager.Subscribe(alt, Keys.D8, () => workspaces.SwitchToWorkspace(7), "switch to workspace 8");
-        manager.Subscribe(alt, Keys.D9, () => workspaces.SwitchToWorkspace(8), "switch to workspace 9");
+        // manager.Subscribe(alt, Keys.D1, () => workspaces.SwitchToWorkspace(0), "switch to workspace 1");
+        // manager.Subscribe(alt, Keys.D2, () => workspaces.SwitchToWorkspace(1), "switch to workspace 2");
+        // manager.Subscribe(alt, Keys.D3, () => workspaces.SwitchToWorkspace(2), "switch to workspace 3");
+        // manager.Subscribe(alt, Keys.D4, () => workspaces.SwitchToWorkspace(3), "switch to workspace 4");
+        // manager.Subscribe(alt, Keys.D5, () => workspaces.SwitchToWorkspace(4), "switch to workspace 5");
+        // manager.Subscribe(alt, Keys.D6, () => workspaces.SwitchToWorkspace(5), "switch to workspace 6");
+        // manager.Subscribe(alt, Keys.D7, () => workspaces.SwitchToWorkspace(6), "switch to workspace 7");
+        // manager.Subscribe(alt, Keys.D8, () => workspaces.SwitchToWorkspace(7), "switch to workspace 8");
+        // manager.Subscribe(alt, Keys.D9, () => workspaces.SwitchToWorkspace(8), "switch to workspace 9");
 
-        // Moving window to workspaces
-        Subscribe(mod | KeyModifiers.LShift, Keys.D1,
-            () => workspaces.MoveFocusedWindowToWorkspace(0), "switch focused window to workspace 1");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D2,
-            () => workspaces.MoveFocusedWindowToWorkspace(1), "switch focused window to workspace 2");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D3,
-            () => workspaces.MoveFocusedWindowToWorkspace(2), "switch focused window to workspace 3");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D4,
-            () => workspaces.MoveFocusedWindowToWorkspace(3), "switch focused window to workspace 4");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D5,
-            () => workspaces.MoveFocusedWindowToWorkspace(4), "switch focused window to workspace 5");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D6,
-            () => workspaces.MoveFocusedWindowToWorkspace(5), "switch focused window to workspace 6");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D7,
-            () => workspaces.MoveFocusedWindowToWorkspace(6), "switch focused window to workspace 7");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D8,
-            () => workspaces.MoveFocusedWindowToWorkspace(7), "switch focused window to workspace 8");
-
-        Subscribe(mod | KeyModifiers.LShift, Keys.D9,
-            () => workspaces.MoveFocusedWindowToWorkspace(8), "switch focused window to workspace 9");        
+        // // Moving window to workspaces
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D1, () => workspaces.MoveFocusedWindowToWorkspace(0), "switch focused window to workspace 1");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D2, () => workspaces.MoveFocusedWindowToWorkspace(1), "switch focused window to workspace 2");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D3, () => workspaces.MoveFocusedWindowToWorkspace(2), "switch focused window to workspace 3");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D4, () => workspaces.MoveFocusedWindowToWorkspace(3), "switch focused window to workspace 4");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D5, () => workspaces.MoveFocusedWindowToWorkspace(4), "switch focused window to workspace 5");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D6, () => workspaces.MoveFocusedWindowToWorkspace(5), "switch focused window to workspace 6");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D7, () => workspaces.MoveFocusedWindowToWorkspace(6), "switch focused window to workspace 7");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D8, () => workspaces.MoveFocusedWindowToWorkspace(7), "switch focused window to workspace 8");
+        // manager.Subscribe(alt | KeyModifiers.LShift, Keys.D9, () => workspaces.MoveFocusedWindowToWorkspace(8), "switch focused window to workspace 9");        
 
         // Left, Right keys
         manager.Subscribe(winCtrl, Keys.Left, () => workspaces.SwitchToPreviousWorkspace(), "switch to previous workspace");
